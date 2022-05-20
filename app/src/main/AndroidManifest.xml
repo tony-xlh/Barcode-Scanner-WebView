@@ -13,12 +13,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.WebViewDemo">
         <activity
-            android:name=".NativeActivity"
-            android:exported="false" />
-        <activity
-            android:name=".JSActivity"
-            android:exported="false" />
-        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>

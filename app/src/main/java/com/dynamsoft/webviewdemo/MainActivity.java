@@ -1,16 +1,10 @@
 package com.dynamsoft.webviewdemo;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.annotation.TargetApi;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.http.SslError;
 import android.os.Build;
@@ -24,27 +18,34 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity  {
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final int CAMERA_REQUEST_CODE = 10;
     public static final int BARCODE_RESULT_CODE = 50;
-    private Context context;
+    private WebView webView;
+    private TextView textView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        context = this.context;
+
+        webView = findViewById(R.id.webView);
+        textView = findViewById(R.id.resultTextView);
         if (hasCameraPermission() == false) {
             requestPermission();
         }
+        loadWebViewSettings();
+
         Button scanBarcodesJSButton = findViewById(R.id.scanBarcodesJSButton);
         scanBarcodesJSButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, JSActivity.class);
-                getSomeInfoLauncher.launch(intent);
+                webView.setVisibility(View.VISIBLE);
+                loadUrl();
             }
         });
 
@@ -52,25 +53,10 @@ public class MainActivity extends AppCompatActivity {
         scanBarcodesNativeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, NativeActivity.class);
-                startActivity(intent);
+
             }
         });
     }
-
-
-    ActivityResultLauncher<Intent> getSomeInfoLauncher =
-            registerForActivityResult(
-                    new ActivityResultContracts.StartActivityForResult(),
-                    result ->
-                    {
-                        Intent intent = result.getData();
-                        if (intent != null) {
-                            Log.d("DBR", intent.getStringExtra("result"));
-                            Toast.makeText(this,intent.getStringExtra("result"),Toast.LENGTH_SHORT).show();
-
-                        }
-                    } );
 
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(
@@ -87,17 +73,63 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                                           int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case CAMERA_REQUEST_CODE:
-                if (grantResults.length > 0 &&
-                        grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                } else {
-                    Toast.makeText(this, "Please grant camera permission", Toast.LENGTH_SHORT).show();
-                }
+    private void loadWebViewSettings(){
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
+
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        settings.setAllowContentAccess(true);
+        settings.setAllowFileAccessFromFileURLs(true);
+        settings.setAllowUniversalAccessFromFileURLs(true);
+        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        settings.setMediaPlaybackRequiresUserGesture(false);
+
+        // Enable remote debugging via chrome://inspect
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
+
+        webView.clearCache(true);
+        webView.clearHistory();
+        webView.setWebViewClient(new WebViewClient(){
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler,
+                                           SslError error) {
+                handler.proceed();
+            }
+        });
+
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onPermissionRequest(final PermissionRequest request) {
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        request.grant(request.getResources());
+                    }
+                });
+            }
+        });
+        webView.addJavascriptInterface(new JSInterface(new ScanHandler (){
+          @Override
+          public void onScanned(String result){
+              Log.d("DBR","on scanned: "+result);
+              runOnUiThread(new Runnable() {
+                  @Override
+                  public void run() {
+                      webView.setVisibility(View.INVISIBLE);
+                      textView.setText(result);
+                  }
+              });
+          }
+        }), "AndroidFunction");
+    }
+
+    private void loadUrl(){
+        webView.loadUrl("file:android_asset/scanner.html");
     }
 }

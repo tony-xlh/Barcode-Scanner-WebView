@@ -5,18 +5,14 @@ import android.util.Log;
 import android.webkit.JavascriptInterface;
 
 public class JSInterface {
-    Activity activity;
 
-    JSInterface(Activity activity) {
-        this.activity = activity;
+    private ScanHandler mHandler;
+    JSInterface(ScanHandler handler){
+      mHandler = handler;
     }
-
     @JavascriptInterface
     public void returnResult(String result) {
         Log.d("DBR","js: "+result);
-        if (this.activity instanceof JSActivity) {
-            JSActivity.closeWithResult(result);
-        }
+        mHandler.onScanned(result);
     }
-
 }
