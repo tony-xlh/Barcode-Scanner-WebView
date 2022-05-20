@@ -2,9 +2,12 @@ package com.dynamsoft.webviewdemo;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
@@ -15,10 +18,12 @@ import android.webkit.WebViewClient;
 
 public class JSActivity extends AppCompatActivity {
     private WebView webView;
+    public static Activity mActivity;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_js);
+        mActivity = this;
         webView = findViewById(R.id.jsWebView);
         loadWebViewSettings();
         loadUrl();
@@ -65,9 +70,18 @@ public class JSActivity extends AppCompatActivity {
                 });
             }
         });
+        webView.addJavascriptInterface(new JSInterface(this), "AndroidFunction");
     }
 
     private void loadUrl(){
+
         webView.loadUrl("file:android_asset/scanner.html");
+    }
+
+    public static void closeWithResult(String result){
+        Intent intent = new Intent();
+        intent.putExtra("result",result);
+        mActivity.setResult(MainActivity.BARCODE_RESULT_CODE,intent);
+        mActivity.finish();
     }
 }

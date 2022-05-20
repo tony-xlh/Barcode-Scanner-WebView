@@ -1,16 +1,21 @@
 package com.dynamsoft.webviewdemo;
 
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
@@ -24,11 +29,13 @@ import android.widget.Toast;
 public class MainActivity extends AppCompatActivity {
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final int CAMERA_REQUEST_CODE = 10;
-
+    public static final int BARCODE_RESULT_CODE = 50;
+    private Context context;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        context = this.context;
         if (hasCameraPermission() == false) {
             requestPermission();
         }
@@ -37,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, JSActivity.class);
-                startActivity(intent);
+                getSomeInfoLauncher.launch(intent);
             }
         });
 
@@ -52,6 +59,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    ActivityResultLauncher<Intent> getSomeInfoLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result ->
+                    {
+                        Intent intent = result.getData();
+                        if (intent != null) {
+                            Log.d("DBR", intent.getStringExtra("result"));
+                            Toast.makeText(this,intent.getStringExtra("result"),Toast.LENGTH_SHORT).show();
+
+                        }
+                    } );
 
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(

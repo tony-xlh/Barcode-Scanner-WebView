@@ -90,8 +90,13 @@ async function decode(){
     var video = document.getElementsByClassName("camera")[0];
     decoding = true;
     var barcodes = await barcodeReader.decode(video);
-    decoding = false;
+
     drawOverlay(barcodes);
+    if (barcodes.length > 0) {
+      AndroidFunction.returnResult(barcodes[0].barcodeText);
+      return;
+    }
+    decoding = false;
   }
 }
 
