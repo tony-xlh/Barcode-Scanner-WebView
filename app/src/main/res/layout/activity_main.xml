@@ -17,16 +17,10 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <Button
-            android:id="@+id/scanBarcodesJSButton"
+            android:id="@+id/scanBarcodesButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Scan Barcodes (JavaScript)" />
-
-        <Button
-            android:id="@+id/scanBarcodesNativeButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Scan Barcodes (Native)" />
+            android:text="Scan Barcodes" />
 
         <TextView
             android:id="@+id/resultTextView"

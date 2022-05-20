@@ -19,15 +19,12 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity  {
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final int CAMERA_REQUEST_CODE = 10;
-    public static final int BARCODE_RESULT_CODE = 50;
     private WebView webView;
     private TextView textView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,25 +32,19 @@ public class MainActivity extends AppCompatActivity  {
 
         webView = findViewById(R.id.webView);
         textView = findViewById(R.id.resultTextView);
+
         if (hasCameraPermission() == false) {
             requestPermission();
         }
+
         loadWebViewSettings();
 
-        Button scanBarcodesJSButton = findViewById(R.id.scanBarcodesJSButton);
-        scanBarcodesJSButton.setOnClickListener(new View.OnClickListener() {
+        Button scanBarcodesButton = findViewById(R.id.scanBarcodesButton);
+        scanBarcodesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 webView.setVisibility(View.VISIBLE);
-                loadUrl();
-            }
-        });
-
-        Button scanBarcodesNativeButton = findViewById(R.id.scanBarcodesNativeButton);
-        scanBarcodesNativeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
+                webView.loadUrl("file:android_asset/scanner.html");
             }
         });
     }
@@ -127,9 +118,5 @@ public class MainActivity extends AppCompatActivity  {
               });
           }
         }), "AndroidFunction");
-    }
-
-    private void loadUrl(){
-        webView.loadUrl("file:android_asset/scanner.html");
     }
 }
