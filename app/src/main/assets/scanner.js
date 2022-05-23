@@ -11,49 +11,76 @@ closeButton.onclick = function() {
   scannerContainer.style.display = "none";
   home.style.display = "";
 }
+
 document.getElementsByClassName("camera")[0].addEventListener('loadeddata',onPlayed, false);
 
 init();
-
 
 async function init(){
   Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
   barcodeReader = await Dynamsoft.DBR.BarcodeReader.createInstance();
   document.getElementById("status").innerHTML = "";
-  startCamera();
 }
 
-function startCamera(){
+function resumeScan(){
+  if (localStream) {
+    console.log("resumeScan");
+    var camera = document.getElementsByClassName("camera")[0];
+    camera.play();
+    startDecodingLoop();
+  }
+}
+
+function pauseScan(){
+  if (localStream) {
+    clearInterval(interval);
+    var camera = document.getElementsByClassName("camera")[0];
+    camera.pause();
+  }
+}
+
+function isCameraOpened(){
+  if (localStream) {
+    return "yes";
+  }else{
+    return "no";
+  }
+}
+
+function startScan(){
+  decoding = false;
   scannerContainer.style.display = "";
   home.style.display = "none";
-  play();
+  play(true);
 }
 
-function play(deviceId) {
+function play(faceBack) {
   stop();
   var constraints = {};
 
-  if (!!deviceId){
-      constraints = {
-          video: {deviceId: deviceId},
-          audio: false
-      }
+  if (faceBack === true){
+    constraints = {
+        video: {facingMode: { exact: "environment" }},
+        audio: false
+    }
   }else{
-      constraints = {
-          video: {facingMode: { exact: "environment" }},
-          audio: false
-      }
+    constraints = {
+        video: true,
+        audio: false
+    }
   }
 
   navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
-      localStream = stream;
-      var camera = document.getElementsByClassName("camera")[0];
-      // Attach local stream to video element
-      camera.srcObject = stream;
-
+    localStream = stream;
+    var camera = document.getElementsByClassName("camera")[0];
+    // Attach local stream to video element
+    camera.srcObject = stream;
   }).catch(function(err) {
       console.error('getUserMediaError', err, err.stack);
       alert(err.message);
+      if (faceBack === true) { //for pc devices
+        play(false);
+      }
   });
 }
 
@@ -70,7 +97,7 @@ function stop(){
 
 function onPlayed() {
   updateSVGViewBoxBasedOnVideoSize();
-  startDecoding();
+  startDecodingLoop();
 }
 
 function updateSVGViewBoxBasedOnVideoSize(){
@@ -79,24 +106,29 @@ function updateSVGViewBoxBasedOnVideoSize(){
   svg.setAttribute("viewBox","0 0 "+camera.videoWidth+" "+camera.videoHeight);
 }
 
-function startDecoding(){
+function startDecodingLoop(){
+  decoding = false;
+  var svg = document.getElementsByTagName("svg")[0];
+  svg.innerHTML = "";
+
   clearInterval(interval);
   //1000/25=40
   interval = setInterval(decode, 40);
 }
 
 async function decode(){
-  if (decoding === false) {
+  if (decoding === false && barcodeReader) {
     var video = document.getElementsByClassName("camera")[0];
     decoding = true;
     var barcodes = await barcodeReader.decode(video);
-
+    decoding = false;
     drawOverlay(barcodes);
     if (barcodes.length > 0) {
+      pauseScan();
       AndroidFunction.returnResult(barcodes[0].barcodeText);
       return;
     }
-    decoding = false;
+
   }
 }
 

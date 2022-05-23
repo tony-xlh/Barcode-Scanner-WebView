@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -38,16 +39,56 @@ public class MainActivity extends AppCompatActivity  {
         }
 
         loadWebViewSettings();
+        webView.loadUrl("file:android_asset/scanner.html");
 
         Button scanBarcodesButton = findViewById(R.id.scanBarcodesButton);
         scanBarcodesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                webView.evaluateJavascript("javascript:isCameraOpened()", new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+                        Log.d("DBR","camera opened?: "+value);
+                        if (value.endsWith("\"no\"")) {
+                            Log.d("DBR","start scan");
+                            startScan();
+                        }else{
+                            Log.d("DBR","resume scan");
+                            resumeScan();
+                        }
+                    }
+                });
+
                 webView.setVisibility(View.VISIBLE);
-                webView.loadUrl("file:android_asset/scanner.html");
             }
         });
     }
+
+    private void startScan(){
+        webView.evaluateJavascript("javascript:startScan()", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String value) {
+            }
+        });
+    }
+
+    private void pauseScan(){
+        webView.evaluateJavascript("javascript:pauseScan()", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String value) {
+            }
+        });
+    }
+
+    private void resumeScan(){
+        webView.evaluateJavascript("javascript:resumeScan()", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String value) {
+            }
+        });
+    }
+
+
 
     private boolean hasCameraPermission() {
         return ContextCompat.checkSelfPermission(
