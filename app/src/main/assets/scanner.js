@@ -4,14 +4,7 @@ var localStream;
 var interval;
 var scannerContainer = document.querySelector(".scanner");
 var home = document.querySelector(".home");
-
-var closeButton = document.querySelector("#closeButton");
-closeButton.onclick = function() {
-  stop();
-  scannerContainer.style.display = "none";
-  home.style.display = "";
-}
-
+var timeoutAfterScan = 100;
 document.getElementsByClassName("camera")[0].addEventListener('loadeddata',onPlayed, false);
 
 init();
@@ -120,13 +113,15 @@ async function decode(){
     var video = document.getElementsByClassName("camera")[0];
     decoding = true;
     var barcodes = await barcodeReader.decode(video);
-    decoding = false;
     drawOverlay(barcodes);
     if (barcodes.length > 0) {
-      pauseScan();
-      AndroidFunction.returnResult(barcodes[0].barcodeText);
+      setTimeout(function(){
+        pauseScan();
+        AndroidFunction.returnResult(barcodes[0].barcodeText);
+      },timeoutAfterScan);
       return;
     }
+    decoding = false;
   }
 }
 

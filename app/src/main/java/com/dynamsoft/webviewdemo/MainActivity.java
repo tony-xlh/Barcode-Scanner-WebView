@@ -122,11 +122,11 @@ public class MainActivity extends AppCompatActivity  {
             webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
 
-        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        //settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         settings.setAllowContentAccess(true);
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
-        settings.setJavaScriptCanOpenWindowsAutomatically(true);
+        //settings.setJavaScriptCanOpenWindowsAutomatically(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
 
         // Enable remote debugging via chrome://inspect
@@ -134,8 +134,9 @@ public class MainActivity extends AppCompatActivity  {
             WebView.setWebContentsDebuggingEnabled(true);
         }
 
-        webView.clearCache(true);
-        webView.clearHistory();
+        //webView.clearCache(true);
+        //webView.clearHistory();
+
         webView.setWebViewClient(new WebViewClient(){
             @Override
             public void onPageFinished(WebView view, String url) {
@@ -172,5 +173,11 @@ public class MainActivity extends AppCompatActivity  {
               });
           }
         }), "AndroidFunction");
+    }
+
+    @Override
+    public void onBackPressed() {
+        pauseScan();
+        webView.setVisibility(View.INVISIBLE);
     }
 }
