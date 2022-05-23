@@ -51,6 +51,7 @@ public class MainActivity extends AppCompatActivity  {
         }
 
         loadWebViewSettings();
+
         webView.loadUrl("https://appassets.androidplatform.net/assets/scanner.html");
         //webView.loadUrl("file:android_asset/scanner.html");
 
