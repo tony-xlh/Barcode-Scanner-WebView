@@ -5,6 +5,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.http.SslError;
 import android.os.Build;
@@ -20,17 +21,20 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity  {
     private static final String[] CAMERA_PERMISSION = new String[]{Manifest.permission.CAMERA};
     private static final int CAMERA_REQUEST_CODE = 10;
     private WebView webView;
     private TextView textView;
+    private Boolean pageFinished = false;
+    private Context ctx;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        ctx = this;
         webView = findViewById(R.id.webView);
         textView = findViewById(R.id.resultTextView);
 
@@ -45,21 +49,26 @@ public class MainActivity extends AppCompatActivity  {
         scanBarcodesButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                webView.evaluateJavascript("javascript:isCameraOpened()", new ValueCallback<String>() {
-                    @Override
-                    public void onReceiveValue(String value) {
-                        Log.d("DBR","camera opened?: "+value);
-                        if (value.endsWith("\"no\"")) {
-                            Log.d("DBR","start scan");
-                            startScan();
-                        }else{
-                            Log.d("DBR","resume scan");
-                            resumeScan();
+                if (pageFinished) {
+                    webView.evaluateJavascript("javascript:isCameraOpened()", new ValueCallback<String>() {
+                        @Override
+                        public void onReceiveValue(String value) {
+                            Log.d("DBR","camera opened?: "+value);
+                            if (value.endsWith("\"yes\"")) {
+                                Log.d("DBR","resume scan");
+                                resumeScan();
+                            }else{
+                                Log.d("DBR","start scan");
+                                startScan();
+                            }
                         }
-                    }
-                });
+                    });
 
-                webView.setVisibility(View.VISIBLE);
+                    webView.setVisibility(View.VISIBLE);
+                }else{
+                    Toast.makeText(ctx,"The web page has not been loaded.",Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
     }
@@ -128,6 +137,10 @@ public class MainActivity extends AppCompatActivity  {
         webView.clearCache(true);
         webView.clearHistory();
         webView.setWebViewClient(new WebViewClient(){
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                pageFinished = true;
+            }
             @Override
             public void onReceivedSslError(WebView view, SslErrorHandler handler,
                                            SslError error) {
