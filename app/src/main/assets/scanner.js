@@ -17,14 +17,13 @@ document.getElementsByClassName("camera")[0].addEventListener('loadeddata',onPla
 init();
 
 async function init(){
-  Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
+  //Dynamsoft.DBR.BarcodeReader.license = "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==";
   barcodeReader = await Dynamsoft.DBR.BarcodeReader.createInstance();
   document.getElementById("status").innerHTML = "";
 }
 
 function resumeScan(){
   if (localStream) {
-    console.log("resumeScan");
     var camera = document.getElementsByClassName("camera")[0];
     camera.play();
     startDecodingLoop();
@@ -128,7 +127,6 @@ async function decode(){
       AndroidFunction.returnResult(barcodes[0].barcodeText);
       return;
     }
-
   }
 }
 
