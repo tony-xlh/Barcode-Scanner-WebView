@@ -125,19 +125,12 @@ public class MainActivity extends AppCompatActivity  {
     }
 
     private void loadWebViewSettings(){
-
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
-
-
-        settings.setAllowContentAccess(true);
-        settings.setAllowFileAccessFromFileURLs(true);
-        settings.setAllowUniversalAccessFromFileURLs(true);
-        settings.setMediaPlaybackRequiresUserGesture(false);
 
         // Enable remote debugging via chrome://inspect
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
