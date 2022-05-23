@@ -1,12 +1,15 @@
 package com.dynamsoft.webviewdemo;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.webkit.WebViewAssetLoader;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,6 +19,8 @@ import android.webkit.PermissionRequest;
 import android.webkit.SslErrorHandler;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -30,6 +35,9 @@ public class MainActivity extends AppCompatActivity  {
     private TextView textView;
     private Boolean pageFinished = false;
     private Context ctx;
+    final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+            .build();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,7 +51,8 @@ public class MainActivity extends AppCompatActivity  {
         }
 
         loadWebViewSettings();
-        webView.loadUrl("file:android_asset/scanner.html");
+        webView.loadUrl("https://appassets.androidplatform.net/assets/scanner.html");
+        //webView.loadUrl("file:android_asset/scanner.html");
 
         Button scanBarcodesButton = findViewById(R.id.scanBarcodesButton);
         scanBarcodesButton.setOnClickListener(new View.OnClickListener() {
@@ -115,6 +124,7 @@ public class MainActivity extends AppCompatActivity  {
     }
 
     private void loadWebViewSettings(){
+
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
 
@@ -142,6 +152,17 @@ public class MainActivity extends AppCompatActivity  {
             public void onReceivedSslError(WebView view, SslErrorHandler handler,
                                            SslError error) {
                 handler.proceed();
+            }
+            @Override
+            @RequiresApi(21)
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+
+            @Override
+            @SuppressWarnings("deprecation") // for API < 21
+            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                return assetLoader.shouldInterceptRequest(Uri.parse(url));
             }
         });
 
