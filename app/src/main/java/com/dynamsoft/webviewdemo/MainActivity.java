@@ -171,24 +171,35 @@ public class MainActivity extends AppCompatActivity  {
                 });
             }
         });
-
         webView.addJavascriptInterface(new JSInterface(new ScanHandler (){
-          @Override
-          public void onScanned(String result){
-              Log.d("DBR","on scanned: "+result);
-              runOnUiThread(new Runnable() {
-                  @Override
-                  public void run() {
-                      webView.setVisibility(View.INVISIBLE);
-                      textView.setText(result);
-                  }
-              });
-          }
+            @Override
+            public void onScanned(String result){
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        webView.setVisibility(View.INVISIBLE);
+                        textView.setText(result);
+                    }
+                });
+            }
         }), "AndroidFunction");
     }
 
     @Override
     public void onBackPressed() {
+        pauseScan();
+        webView.setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        webView.reload();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
         pauseScan();
         webView.setVisibility(View.INVISIBLE);
     }
