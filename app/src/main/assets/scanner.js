@@ -141,7 +141,7 @@ function drawOverlay(barcodes){
     text.setAttribute("x",lr.x1);
     text.setAttribute("y",lr.y1);
     text.setAttribute("fill","red");
-    text.setAttribute("fontSize","20");
+    text.setAttribute("font-size","20");
     svg.append(polygon);
     svg.append(text);
   }
