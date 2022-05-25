@@ -107,6 +107,13 @@ public class MainActivity extends AppCompatActivity  {
         });
     }
 
+    private void stopScan(){
+        webView.evaluateJavascript("javascript:stopScan()", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String value) {
+            }
+        });
+    }
 
 
     private boolean hasCameraPermission() {
@@ -194,13 +201,14 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     protected void onResume() {
         super.onResume();
-        webView.reload();
+        if (webView.getVisibility() == View.VISIBLE) {
+          startScan();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        pauseScan();
-        webView.setVisibility(View.INVISIBLE);
+        stopScan();
     }
 }

@@ -46,6 +46,14 @@ function startScan(){
   play(true);
 }
 
+function stopScan(){
+  if (localStream) {
+    clearInterval(interval);
+    stop();
+    localStream = null;
+  }
+}
+
 function play(faceBack) {
   stop();
   var constraints = {};
