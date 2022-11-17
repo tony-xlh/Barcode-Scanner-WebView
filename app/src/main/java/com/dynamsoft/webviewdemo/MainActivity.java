@@ -134,7 +134,7 @@ public class MainActivity extends AppCompatActivity  {
     private void loadWebViewSettings(){
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
-
+        settings.setMediaPlaybackRequiresUserGesture(false);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         }
